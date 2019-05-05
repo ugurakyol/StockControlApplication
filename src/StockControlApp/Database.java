@@ -15,7 +15,7 @@ public class Database {
             try{
 
                 Class.forName("com.mysql.jdbc.Driver");
-                con=DriverManager.getConnection("jdbc:mysql://localhost:3306/StockControl","root","78523");
+                con=DriverManager.getConnection("jdbc:mysql://localhost:3306/StockControl?useSSL=false","root","78523");
                 //JOptionPane.showMessageDialog(null, "Database connection is opened successfully");
                 System.out.println("=== Database connection is opened successfully ===");
 
