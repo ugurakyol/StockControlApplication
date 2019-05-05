@@ -158,36 +158,43 @@ public class Showroom extends JFrame implements ActionListener {
 
             int i = ((Integer)property);
 
+            if(rowQuantitive[i].getText().matches("[0-9]+")){
+
             if (Integer.valueOf(rowQuantitive[i].getText()) <= ListOfProduct.get(i).getProductQuantitative()){
 
-                int input = JOptionPane.showConfirmDialog(null,
-                        "Would you like add "+Integer.parseInt(rowQuantitive[i].getText())+" "+ ListOfProduct.get(i).getProductName()+" to basket ?",
-                        "Select an Option...",JOptionPane.YES_NO_OPTION);
 
-                if( input == 0 ){
 
-                    System.out.println("======== New Product is Added To Basket ==========");
-                    System.out.println(
-                            ListOfProduct.get(i).getProductID()
-                                    +" "+ ListOfProduct.get(i).getProductName()
-                                    +" "+ ListOfProduct.get(i).getProductPrice()
-                                    +" "+ Integer.valueOf(rowQuantitive[i].getText()));
-                    System.out.println("==================================================");
+                    int input = JOptionPane.showConfirmDialog(null,
+                            "Would you like add "+Integer.parseInt(rowQuantitive[i].getText())+" "+ ListOfProduct.get(i).getProductName()+" to basket ?",
+                            "Select an Option...",JOptionPane.YES_NO_OPTION);
 
-                    BasketList.add(new Product(
-                            ListOfProduct.get(i).getProductID(),
-                            ListOfProduct.get(i).getProductName(),
-                            ListOfProduct.get(i).getProductPrice(),
-                            Integer.valueOf(rowQuantitive[i].getText())));
+                    if( input == 0 ){
 
-                    ListOfProduct.set(i,new Product(
-                            ListOfProduct.get(i).getProductID(),
-                            ListOfProduct.get(i).getProductName(),
-                            ListOfProduct.get(i).getProductPrice(),
-                            ListOfProduct.get(i).getProductQuantitative() - Integer.valueOf(rowQuantitive[i].getText())
-                    ));
-                    JOptionPane.showMessageDialog(null,"You added " + ListOfProduct.get(i).getProductName());
-                }
+                        System.out.println("======== New Product is Added To Basket ==========");
+                        System.out.println(
+                                ListOfProduct.get(i).getProductID()
+                                        +" "+ ListOfProduct.get(i).getProductName()
+                                        +" "+ ListOfProduct.get(i).getProductPrice()
+                                        +" "+ Integer.valueOf(rowQuantitive[i].getText()));
+                        System.out.println("==================================================");
+
+                        BasketList.add(new Product(
+                                ListOfProduct.get(i).getProductID(),
+                                ListOfProduct.get(i).getProductName(),
+                                ListOfProduct.get(i).getProductPrice(),
+                                Integer.valueOf(rowQuantitive[i].getText())));
+
+                        ListOfProduct.set(i,new Product(
+                                ListOfProduct.get(i).getProductID(),
+                                ListOfProduct.get(i).getProductName(),
+                                ListOfProduct.get(i).getProductPrice(),
+                                ListOfProduct.get(i).getProductQuantitative() - Integer.valueOf(rowQuantitive[i].getText())
+                        ));
+                        JOptionPane.showMessageDialog(null,"You added " + ListOfProduct.get(i).getProductName());
+                    }
+
+
+
 
             }else{
 
@@ -197,6 +204,10 @@ public class Showroom extends JFrame implements ActionListener {
                         "Insufficient stock",JOptionPane.ERROR_MESSAGE);
                 rowQuantitive[i].setText(String.valueOf(ListOfProduct.get(i).getProductQuantitative()));
             }
+        }else {
+            JOptionPane.showMessageDialog(null,"Please, type numeric value!","Information Message",JOptionPane.INFORMATION_MESSAGE);
+            rowQuantitive[i].setText("1");
+        }
 
         }
     }
