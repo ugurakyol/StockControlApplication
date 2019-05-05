@@ -126,7 +126,7 @@ public class Showroom extends JFrame implements ActionListener {
                     for (Product eachProduct:BasketList){
 
                         left = ListOfProduct.get(eachProduct.getProductID()).getProductQuantitative() - eachProduct.getProductQuantitative();
-                        System.out.println("Left is " + left + " New value of Quantative " + eachProduct.getProductID());
+                        System.out.println(" New value of " + eachProduct.getProductName() +" is " + left + " left" );
                         preparedStmt.setInt   (1, left );
                         preparedStmt.setInt   (2, eachProduct.getProductID());
                         preparedStmt.executeUpdate();
