@@ -14,7 +14,7 @@ public class Admin extends JFrame implements ActionListener {
 
     private static final long serialVersionUID = 1L;
     private static PreparedStatement st;
-    private Database connection = new Database();
+    private Database database = new Database();
 
     private JLabel title = new JLabel("Admin Panel");
     private java.util.List<Users> UsersList = new ArrayList<>();
@@ -23,6 +23,8 @@ public class Admin extends JFrame implements ActionListener {
     private JButton btnBack;
     private JButton StocksBtn;
     private JButton UsersBtn;
+    private JButton [] RowButton;
+    private JTextField[] rowQuantitive = new JTextField[12];
 
     JTextField UserIDText = new JTextField(10);
     JTextField UserNameText = new JTextField(10);
@@ -263,8 +265,7 @@ public class Admin extends JFrame implements ActionListener {
 
         try{
 
-            Statement statement = Database.getCon().createStatement();
-            ResultSet rsNumberOfRecord = statement.executeQuery("select count(*) from Products");
+            ResultSet rsNumberOfRecord = database.NumberOfRecord();
 
             int rows =0;
             while (rsNumberOfRecord.next()){
@@ -274,10 +275,16 @@ public class Admin extends JFrame implements ActionListener {
             System.out.println("===========" + rows +" Records are founded. ============");
             rsNumberOfRecord.close();
 
+            for (int i = 0; i <12; i++) {
+                rowQuantitive[i] = new JTextField("1",2);
+            }
+            RowButton = new JButton[rows];
+
             JPanel [] RowPanel = new JPanel[rows];
 
-            ResultSet rs=statement.executeQuery("select * from Products");
+            ResultSet rs = database.ProductList();
 
+            Stocks.removeAll();
             Stocks.setLayout(new GridLayout(rows+2,1));
 
             int i=0;
@@ -297,6 +304,14 @@ public class Admin extends JFrame implements ActionListener {
                 RowPanel[i].add(new JLabel(rs.getString(2) + " "));
                 RowPanel[i].add(new JLabel(rs.getInt(3) + " Tl "));
                 RowPanel[i].add(new JLabel(rs.getInt(4) + " Left" ));
+
+                rowQuantitive[i].setText("1");
+                RowPanel[i].add(rowQuantitive[i]);
+                RowButton[i] = new JButton("Add to stock");
+                RowPanel[i].add(RowButton[i]);
+                RowButton[i].addActionListener(this::actionRowsPerformed);
+                RowButton[i].putClientProperty("id", i);
+
                 i = i+1;
 
             }
@@ -306,6 +321,88 @@ public class Admin extends JFrame implements ActionListener {
             e.printStackTrace();
         }
     }
+
+    private void actionRowsPerformed(ActionEvent event){
+
+        JButton button = (JButton)event.getSource();
+        Object property = button.getClientProperty("id");
+
+        if (property instanceof Integer) {
+
+            int i = ((Integer)property);
+
+            if(rowQuantitive[i].getText().matches("[0-9]+") ){
+
+                if (Integer.valueOf(rowQuantitive[i].getText()) > 0){
+
+
+
+                    int input = JOptionPane.showConfirmDialog(null,
+                            "Would you like add "+Integer.parseInt(rowQuantitive[i].getText())+" "+ ListOfProduct.get(i).getProductName()+" to stock ?",
+                            "Select an Option...",JOptionPane.YES_NO_OPTION);
+
+                    if( input == 0 ){
+
+
+                        try{
+
+                            String query = "update Products set ProductLeft = ? where ProductID = ?";
+                            PreparedStatement preparedStmt = Database.getCon().prepareStatement(query);
+                            int left;
+
+                            left = ListOfProduct.get(i).getProductQuantitative()+Integer.valueOf(rowQuantitive[i].getText());
+                            preparedStmt.setInt   (1, left );
+                            preparedStmt.setInt   (2, ListOfProduct.get(i).getProductID());
+                            preparedStmt.executeUpdate();
+
+                            System.out.println("======== New Product is Added To Stock ==========");
+                            System.out.println(
+                                ListOfProduct.get(i).getProductID()
+                                        +" "+ ListOfProduct.get(i).getProductName()
+                                        +" "+ ListOfProduct.get(i).getProductPrice()
+                                        +" "+ Integer.valueOf(rowQuantitive[i].getText()));
+                            System.out.println("==================================================");
+
+                            ListOfProduct.set(i,new Product(
+                                    ListOfProduct.get(i).getProductID(),
+                                    ListOfProduct.get(i).getProductName(),
+                                    ListOfProduct.get(i).getProductPrice(),
+                                    ListOfProduct.get(i).getProductQuantitative() + Integer.valueOf(rowQuantitive[i].getText())
+                            ));
+
+
+                            JOptionPane.showMessageDialog(null,"The enter stock process took place successfully.");
+
+                            Stocks.removeAll();
+                            BringStocks();
+                            Stocks.updateUI();
+
+                        }catch (SQLException e1){
+
+                            e1.printStackTrace();
+                        }
+
+                    }
+
+
+
+
+                }else{
+
+                    JOptionPane.showMessageDialog(
+                            null,
+                            "You can not add less then " + 0,
+                            "Insufficient stock",JOptionPane.ERROR_MESSAGE);
+                    rowQuantitive[i].setText("1");
+                }
+            }else {
+                JOptionPane.showMessageDialog(null,"Please, type valid value!","Information Message",JOptionPane.INFORMATION_MESSAGE);
+                rowQuantitive[i].setText("1");
+            }
+
+        }
+    }
+
 }
 
 
