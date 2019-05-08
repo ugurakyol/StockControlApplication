@@ -29,11 +29,17 @@ public class Showroom extends JFrame implements ActionListener {
     //private JScrollPane CenterBasket;
     // General button of frame are defined on following lines
     private JButton btnBack;
+    private JButton next = new JButton("Next");
+    private JButton back = new JButton("Back");
     private JButton ShowBasketBtn;
     private JButton ShowroomBtn;
+    private JScrollPane scrollcenter;
+    private JPanel productList1;
+    private JPanel productList2;
     private JButton PayButton = new JButton("PAY");
     // RowButton array is Created for each line of product that stored in the database on following line
     private JButton [] RowButton;
+    private JButton [] RowBasketBtn;
     // Five array variables are created for instant value
     private int rows;
     private int [] RowId;
@@ -100,6 +106,16 @@ public class Showroom extends JFrame implements ActionListener {
                 log.setVisible(true);
                 this.dispose();
             }
+            if(e.getSource() == next) {
+
+                productList1.setVisible(false);
+                productList2.setVisible(true);
+
+            }
+            if(e.getSource() == back) {
+                productList1.setVisible(true);
+                productList2.setVisible(false);
+            }
             if(e.getSource() == ShowroomBtn) {
                 CenterShowroom.removeAll();
                 BringRecords();
@@ -149,6 +165,41 @@ public class Showroom extends JFrame implements ActionListener {
             }
         }
 
+    public void actionBasketPerformed(ActionEvent event){
+
+        JButton button = (JButton)event.getSource();
+        Object property = button.getClientProperty("id");
+
+        if (property instanceof Integer) {
+
+            int i = ((Integer)property);
+
+            int input = JOptionPane.showConfirmDialog(null,
+                    "Would you like remove "+ BasketList.get(i).getProductName()+" from basket ?",
+                    "Select an option...",JOptionPane.YES_NO_OPTION);
+
+            if( input == 0 ){
+
+
+
+                System.out.println("======== A Product is removed From Basket ==========");
+                System.out.println(
+                        BasketList.get(i).getProductID()
+                                +" "+ BasketList.get(i).getProductName()
+                                +" "+ BasketList.get(i).getProductPrice()
+                                +" "+ BasketList.get(i).getProductQuantitative());
+                System.out.println("==================================================");
+
+                JOptionPane.showMessageDialog(null," " + BasketList.get(i).getProductName() + " is removed successfully.");
+
+                BasketList.remove(i);
+                CenterBasket.removeAll();
+                CenterBasket.updateUI();
+                Basket();
+            }
+        }
+    }
+
     public void actionRowsPerformed(ActionEvent event){
 
         JButton button = (JButton)event.getSource();
@@ -158,7 +209,7 @@ public class Showroom extends JFrame implements ActionListener {
 
             int i = ((Integer)property);
 
-            if(rowQuantitive[i].getText().matches("[0-9]+")){
+            if(rowQuantitive[i].getText().matches("[0-9]+") && Integer.valueOf(rowQuantitive[i].getText())>0){
 
             if (Integer.valueOf(rowQuantitive[i].getText()) <= ListOfProduct.get(i).getProductQuantitative()){
 
@@ -205,7 +256,7 @@ public class Showroom extends JFrame implements ActionListener {
                 rowQuantitive[i].setText(String.valueOf(ListOfProduct.get(i).getProductQuantitative()));
             }
         }else {
-            JOptionPane.showMessageDialog(null,"Please, type numeric value!","Information Message",JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null,"Please, type valid value!","Information Message",JOptionPane.INFORMATION_MESSAGE);
             rowQuantitive[i].setText("1");
         }
 
@@ -217,16 +268,32 @@ public class Showroom extends JFrame implements ActionListener {
         CenterBasket.removeAll();
         TotalPriceOfBasket=0;
         CenterBasket.setLayout(new GridLayout(12,1));
+        /*
+        int a=0;
+
+        for(Product eachProduct:BasketList){
+            a++;
+        }
+        JOptionPane.showMessageDialog(null,""+a);
+
+         */
         JPanel [] RowPanel = new JPanel[12];
+        RowBasketBtn = new JButton[12];
+
 
         int i=0;
         if (!(BasketList.isEmpty())){
 
-            //if(!isBasketShown) {
 
                 for (Product eachProduct : BasketList) {
 
-                    System.out.println(eachProduct.getProductID() + " " + eachProduct.getProductName() + " " + eachProduct.getProductPrice() + " " + eachProduct.getProductQuantitative());
+                    System.out.println("========= Product List In The Basket ===========");
+                    System.out.println(
+                            eachProduct.getProductID()
+                                    +" "+ eachProduct.getProductName()
+                                    +" "+ eachProduct.getProductPrice()
+                                    +" "+ eachProduct.getProductQuantitative());
+                    System.out.println("==================================================");
 
                     RowPanel[i] = new JPanel();
                     RowPanel[i].setBackground(new Color(255, 255, 255, 100));
@@ -238,6 +305,10 @@ public class Showroom extends JFrame implements ActionListener {
                     RowPanel[i].add(new JLabel(eachProduct.getProductName()));
                     RowPanel[i].add(new JLabel(eachProduct.getProductPrice() + " Tl"));
                     RowPanel[i].add(new JLabel(eachProduct.getProductQuantitative() + " Peaces"));
+                    RowBasketBtn[i] = new JButton("Remove");
+                    RowPanel[i].add(RowBasketBtn[i]);
+                    RowBasketBtn[i].addActionListener(this::actionBasketPerformed);
+                    RowBasketBtn[i].putClientProperty("id", i);
                     TotalPriceOfBasket = TotalPriceOfBasket + (eachProduct.getProductPrice() * eachProduct.getProductQuantitative());
                     i = i + 1;
 
@@ -252,7 +323,6 @@ public class Showroom extends JFrame implements ActionListener {
                 RowPanel[i + 1].add(TotalPrice);
                 PayButton.setVisible(true);
                 RowPanel[i + 1].add(PayButton);
-            //}
 
         }else{
 
@@ -277,17 +347,22 @@ public class Showroom extends JFrame implements ActionListener {
             System.out.println("===========" + rows +" Records are founded. ============");
             rsNumberOfRecord.close();
 
-
-            RowId = new int[rows];
-            RowName = new String[rows];
-            RowPrice = new int[rows];
             for (int i = 0; i <12; i++) {
                 rowQuantitive[i] = new JTextField("1",2);
             }
             RowButton = new JButton[rows];
-            JLabel[] product = new JLabel[rows];
 
-            CenterShowroom.setLayout(new GridLayout(rows+2,1));
+            JPanel showroomMain = new JPanel();
+            showroomMain.setBackground(new Color(255, 255, 255,0));
+            JScrollPane scrollPane = new JScrollPane(showroomMain,ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+                    ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            scrollPane.setBackground(new Color(255, 255, 255,0));
+            //CenterShowroom.setLayout(new GridLayout(rows+2,1));
+            showroomMain.setLayout(new GridLayout(rows+2,1));
+            CenterShowroom.setLayout(new GridLayout(1,1));
+            CenterShowroom.add(scrollPane);
+
+
             JPanel [] RowPanel = new JPanel[rows];
 
             ResultSet rs=statement.executeQuery("select * from Products");
@@ -301,23 +376,14 @@ public class Showroom extends JFrame implements ActionListener {
 
                 RowPanel[i]= new JPanel();
                 RowPanel[i].setBackground(new Color(255, 255, 255,100));
-                CenterShowroom.add(RowPanel[i]);
-                /*
-                product[i] = new JLabel("Product ID: " + String.valueOf(rs.getInt(1))
-                        +"     "+(i+1)+".jpg here"+ "     "+rs.getString(2)
-                        + "     "+String.valueOf(rs.getInt(3)) + " Tl     "
-                        +String.valueOf(rs.getInt(4)) + " Left     " );
-                product[i].setFont(ProductFont);
-                RowPanel[i].add(product[i]);
-                */
+
+                showroomMain.add(RowPanel[i]);
+
                 RowPanel[i].add(new JLabel("Product ID: " + String.valueOf(rs.getInt(1))));
                 RowPanel[i].add(new JLabel(new ImageIcon("/home/akyol/Documents/Stock Control Application/src/Images/"+(i+1)+".png")));
-                //RowPanel[i].add(new JLabel(""+(i+1)+".jpg here"));
                 RowPanel[i].add(new JLabel(rs.getString(2) + " "));
                 RowPanel[i].add(new JLabel(String.valueOf(rs.getInt(3)) + " Tl "));
                 RowPanel[i].add(new JLabel(String.valueOf(rs.getInt(4)) + " Left" ));
-
-
 
                 rowQuantitive[i].setText("1");
                 RowPanel[i].add(rowQuantitive[i]);
@@ -329,6 +395,7 @@ public class Showroom extends JFrame implements ActionListener {
                 i = i+1;
 
             }
+
             System.out.println("==================================================");
 
         } catch (SQLException e) {
