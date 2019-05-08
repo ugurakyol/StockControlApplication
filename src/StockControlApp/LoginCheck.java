@@ -7,7 +7,7 @@ import java.sql.ResultSet;
 public class LoginCheck {
 
     private static PreparedStatement st;
-    Database connection = new Database();
+    private Database connection = new Database();
 
     public String LoginCheck(String username, String password) {
 
@@ -15,7 +15,7 @@ public class LoginCheck {
 
         try {
 
-            st = connection.con.prepareStatement("SELECT * FROM Users WHERE Name= ? AND Password= ?");
+            st = Database.getCon().prepareStatement(connection.getLoginCheck());
             st.setString(1,username);
             st.setString(2,password);
 

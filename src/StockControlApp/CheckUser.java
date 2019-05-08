@@ -4,10 +4,10 @@ import javax.swing.*;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-public class IsUserAvailabel {
+public class CheckUser {
 
         private static PreparedStatement st;
-        Database connection = new Database();
+        private Database connection = new Database();
 
         public Boolean IsUserAvailabel(String username) {
 
@@ -15,7 +15,7 @@ public class IsUserAvailabel {
 
             try {
 
-                st = connection.con.prepareStatement("SELECT * FROM Users WHERE Name= ?");
+                st = Database.getCon().prepareStatement("SELECT * FROM Users WHERE Name= ?");
                 st.setString(1,username);
 
                 ResultSet result = st.executeQuery();

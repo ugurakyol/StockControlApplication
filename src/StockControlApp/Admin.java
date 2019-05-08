@@ -16,7 +16,7 @@ public class Admin extends JFrame implements ActionListener {
     private static PreparedStatement st;
     private Database connection = new Database();
 
-    JLabel title = new JLabel("Admin Panel");
+    private JLabel title = new JLabel("Admin Panel");
     private java.util.List<Users> UsersList = new ArrayList<>();
     private java.util.List<Product> ListOfProduct = new ArrayList<>();
 
@@ -176,12 +176,12 @@ public class Admin extends JFrame implements ActionListener {
             else if(!(PasswordText.getText().equals(PasswordConfirmText.getText()))){ JOptionPane.showMessageDialog(null,"Password is not confirmed");}
             else {
 
-                IsUserAvailabel isUserAvailabel = new IsUserAvailabel();
-                if(!(isUserAvailabel.IsUserAvailabel(UserNameText.getText()))){
+                CheckUser checkUser = new CheckUser();
+                if(!(checkUser.IsUserAvailabel(UserNameText.getText()))){
 
                     try {
 
-                        st = connection.con.prepareStatement("INSERT INTO Users (Name, Surname, Password) VALUES (?, ?, ?)");
+                        st = Database.getCon().prepareStatement("INSERT INTO Users (Name, Surname, Password) VALUES (?, ?, ?)");
                         st.setString(1,UserNameText.getText());
                         st.setString(2,UserSurnameText.getText());
                         st.setString(3,PasswordText.getText());
@@ -213,11 +213,11 @@ public class Admin extends JFrame implements ActionListener {
         }
     }
 
-    public void BringUsers(){
+    private void BringUsers(){
 
         try{
 
-            Statement statement = connection.con.createStatement();
+            Statement statement = Database.getCon().createStatement();
             ResultSet rsNumberOfRecord = statement.executeQuery("select count(*) from Users");
 
             int rows =0;
@@ -245,7 +245,7 @@ public class Admin extends JFrame implements ActionListener {
                 UsersPanel.add(RowPanel[i]);
 
                 RowPanel[i].add(new JLabel((i+1)+ " . "));
-                RowPanel[i].add(new JLabel("User ID: " + String.valueOf(rs.getInt(1))));
+                RowPanel[i].add(new JLabel("User ID: " + rs.getInt(1)));
                 RowPanel[i].add(new JLabel(rs.getString(2) + " "));
                 RowPanel[i].add(new JLabel(String.valueOf(rs.getString(3))));
                 RowPanel[i].add(new JLabel(String.valueOf(rs.getString(4))));
@@ -259,11 +259,11 @@ public class Admin extends JFrame implements ActionListener {
         }
     }
 
-    public void BringStocks(){
+    private void BringStocks(){
 
         try{
 
-            Statement statement = connection.con.createStatement();
+            Statement statement = Database.getCon().createStatement();
             ResultSet rsNumberOfRecord = statement.executeQuery("select count(*) from Products");
 
             int rows =0;
@@ -291,12 +291,12 @@ public class Admin extends JFrame implements ActionListener {
                 RowPanel[i].setBackground(new Color(255, 255, 255,100));
                 Stocks.add(RowPanel[i]);
 
-                RowPanel[i].add(new JLabel("Product ID: " + String.valueOf(rs.getInt(1))));
+                RowPanel[i].add(new JLabel("Product ID: " + rs.getInt(1)));
                 RowPanel[i].add(new JLabel(new ImageIcon("/home/akyol/Documents/Stock Control Application/src/Images/"+(i+1)+".png")));
                 //RowPanel[i].add(new JLabel(""+(i+1)+".jpg here"));
                 RowPanel[i].add(new JLabel(rs.getString(2) + " "));
-                RowPanel[i].add(new JLabel(String.valueOf(rs.getInt(3)) + " Tl "));
-                RowPanel[i].add(new JLabel(String.valueOf(rs.getInt(4)) + " Left" ));
+                RowPanel[i].add(new JLabel(rs.getInt(3) + " Tl "));
+                RowPanel[i].add(new JLabel(rs.getInt(4) + " Left" ));
                 i = i+1;
 
             }

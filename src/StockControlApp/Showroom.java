@@ -7,16 +7,15 @@ import java.awt.event.ActionListener;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 
 
 public class Showroom extends JFrame implements ActionListener {
 
     private static final long serialVersionUID = 1L;
-    // Database connection and statement are defined on following lines
+    // Database database and statement are defined on following lines
     private static PreparedStatement st;
-    private Database connection = new Database();
+    private Database database = new Database();
     // The panels of frame are defined on following lines
     private JPanel panel1;
     private JPanel top;
@@ -137,7 +136,7 @@ public class Showroom extends JFrame implements ActionListener {
                 try{
 
                     String query = "update Products set ProductLeft = ? where ProductID = ?";
-                    PreparedStatement preparedStmt = connection.con.prepareStatement(query);
+                    PreparedStatement preparedStmt = Database.getCon().prepareStatement(query);
                     int left;
                     for (Product eachProduct:BasketList){
 
@@ -165,7 +164,7 @@ public class Showroom extends JFrame implements ActionListener {
             }
         }
 
-    public void actionBasketPerformed(ActionEvent event){
+    private void actionBasketPerformed(ActionEvent event){
 
         JButton button = (JButton)event.getSource();
         Object property = button.getClientProperty("id");
@@ -182,7 +181,7 @@ public class Showroom extends JFrame implements ActionListener {
 
 
 
-                System.out.println("======== A Product is removed From Basket ==========");
+                System.out.println("======== A Product is removed From Basket ========");
                 System.out.println(
                         BasketList.get(i).getProductID()
                                 +" "+ BasketList.get(i).getProductName()
@@ -200,7 +199,7 @@ public class Showroom extends JFrame implements ActionListener {
         }
     }
 
-    public void actionRowsPerformed(ActionEvent event){
+    private void actionRowsPerformed(ActionEvent event){
 
         JButton button = (JButton)event.getSource();
         Object property = button.getClientProperty("id");
@@ -263,7 +262,7 @@ public class Showroom extends JFrame implements ActionListener {
         }
     }
 
-    public void Basket(){
+    private void Basket(){
 
         CenterBasket.removeAll();
         TotalPriceOfBasket=0;
@@ -287,7 +286,7 @@ public class Showroom extends JFrame implements ActionListener {
 
                 for (Product eachProduct : BasketList) {
 
-                    System.out.println("========= Product List In The Basket ===========");
+                    System.out.println("========== Product List In The Basket ============");
                     System.out.println(
                             eachProduct.getProductID()
                                     +" "+ eachProduct.getProductName()
@@ -332,13 +331,11 @@ public class Showroom extends JFrame implements ActionListener {
         }
     }
 
-    public void BringRecords(){
+    private void BringRecords(){
 
         try{
 
-            Statement statement = connection.con.createStatement();
-            ResultSet rsNumberOfRecord = statement.executeQuery("select count(*) from Products");
-
+            ResultSet rsNumberOfRecord = database.NumberOfRecord();
             rows =0;
             while (rsNumberOfRecord.next()){
                 rows = rsNumberOfRecord.getInt(1);
@@ -362,10 +359,9 @@ public class Showroom extends JFrame implements ActionListener {
             CenterShowroom.setLayout(new GridLayout(1,1));
             CenterShowroom.add(scrollPane);
 
-
             JPanel [] RowPanel = new JPanel[rows];
 
-            ResultSet rs=statement.executeQuery("select * from Products");
+            ResultSet rs = database.ProductList();
 
             int i=0;
             while(rs.next()){
@@ -379,11 +375,11 @@ public class Showroom extends JFrame implements ActionListener {
 
                 showroomMain.add(RowPanel[i]);
 
-                RowPanel[i].add(new JLabel("Product ID: " + String.valueOf(rs.getInt(1))));
+                RowPanel[i].add(new JLabel("Product ID: " + rs.getInt(1)));
                 RowPanel[i].add(new JLabel(new ImageIcon("/home/akyol/Documents/Stock Control Application/src/Images/"+(i+1)+".png")));
                 RowPanel[i].add(new JLabel(rs.getString(2) + " "));
-                RowPanel[i].add(new JLabel(String.valueOf(rs.getInt(3)) + " Tl "));
-                RowPanel[i].add(new JLabel(String.valueOf(rs.getInt(4)) + " Left" ));
+                RowPanel[i].add(new JLabel(rs.getInt(3) + " Tl "));
+                RowPanel[i].add(new JLabel(rs.getInt(4) + " Left" ));
 
                 rowQuantitive[i].setText("1");
                 RowPanel[i].add(rowQuantitive[i]);
