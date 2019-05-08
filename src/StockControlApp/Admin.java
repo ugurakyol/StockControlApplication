@@ -190,6 +190,9 @@ public class Admin extends JFrame implements ActionListener {
                         st.executeUpdate();
 
                         JOptionPane.showMessageDialog(null,"The account is created successfully");
+                        UsersPanel.removeAll();
+                        BringUsers();
+                        Users.updateUI();
 
                     }catch(SQLException e1){
                         JOptionPane.showMessageDialog(null, "Could not record to database. Please, try again.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -226,11 +229,20 @@ public class Admin extends JFrame implements ActionListener {
             while (rsNumberOfRecord.next()){
                 rows = rsNumberOfRecord.getInt(1);
             }
-
+            RowButton = new JButton[rows];
             System.out.println("===========" + rows +" Records are founded. ============");
             rsNumberOfRecord.close();
 
+            JPanel ShowUserMain = new JPanel();
+            ShowUserMain.setBackground(new Color(255, 255, 255,0));
+            JScrollPane scrollPane = new JScrollPane(ShowUserMain,ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+                    ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            scrollPane.setBackground(new Color(255, 255, 255,0));
+            //CenterShowroom.setLayout(new GridLayout(rows+2,1));
+            ShowUserMain.setLayout(new GridLayout(rows+2,1));
+
             UsersPanel.setLayout(new GridLayout(rows+2,1));
+            UsersPanel.add(scrollPane);
             JPanel [] RowPanel = new JPanel[rows];
 
             ResultSet rs=statement.executeQuery("select * from Users");
@@ -244,13 +256,19 @@ public class Admin extends JFrame implements ActionListener {
 
                 RowPanel[i]= new JPanel();
                 RowPanel[i].setBackground(new Color(255, 255, 255,100));
-                UsersPanel.add(RowPanel[i]);
+                ShowUserMain.add(RowPanel[i]);
 
                 RowPanel[i].add(new JLabel((i+1)+ " . "));
                 RowPanel[i].add(new JLabel("User ID: " + rs.getInt(1)));
                 RowPanel[i].add(new JLabel(rs.getString(2) + " "));
                 RowPanel[i].add(new JLabel(String.valueOf(rs.getString(3))));
                 RowPanel[i].add(new JLabel(String.valueOf(rs.getString(4))));
+
+                RowButton[i] = new JButton("Remove user");
+                RowPanel[i].add(RowButton[i]);
+                RowButton[i].addActionListener(this::actionUserPerformed);
+                RowButton[i].putClientProperty("id", i);
+
                 i = i+1;
 
             }
@@ -319,6 +337,66 @@ public class Admin extends JFrame implements ActionListener {
 
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void actionUserPerformed(ActionEvent event){
+
+        JButton button = (JButton)event.getSource();
+        Object property = button.getClientProperty("id");
+
+        if (property instanceof Integer) {
+
+            int i = ((Integer)property);
+
+            if(UsersList.get(i).getUserID()==1){
+
+                JOptionPane.showMessageDialog(null,"You are root user. You can not remove yourself!",
+                        "Big mistake",JOptionPane.ERROR_MESSAGE);
+
+            }else{
+
+                int input = JOptionPane.showConfirmDialog(null,
+                        "Would you like remove "+ UsersList.get(i).getName() +" from the system ?",
+                        "Select an Option...",JOptionPane.YES_NO_OPTION);
+
+                if( input == 0 ){
+
+
+                    try{
+
+                        String query = "DELETE FROM Users WHERE UserID = ?;";
+                        PreparedStatement preparedStmt = Database.getCon().prepareStatement(query);
+                        preparedStmt.setInt   (1, UsersList.get(i).getUserID());
+                        preparedStmt.executeUpdate();
+
+                        System.out.println("===== The User is Removed From The System =======");
+                        System.out.println(
+                                UsersList.get(i).getUserID()
+                                        +" "+ UsersList.get(i).getName()
+                                        +" "+ UsersList.get(i).getSurName());
+                        System.out.println("==================================================");
+
+                        UsersList.remove(i);
+
+
+                        JOptionPane.showMessageDialog(null,"The user remove process took place successfully.");
+
+                        UsersPanel.removeAll();
+                        BringUsers();
+                        Users.updateUI();
+
+                    }catch (SQLException e1){
+
+                        e1.printStackTrace();
+                    }
+
+                }
+
+            }
+
+
+
         }
     }
 
